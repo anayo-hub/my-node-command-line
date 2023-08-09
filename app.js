@@ -6,15 +6,17 @@ const fs = require("fs/promises");
     const create = "create a file";
 
     const createFile = async (path) => {
-      let existingFileHandle;
       try {
-        existingFileHandle = await fs.open(path, "r");
+        // check if file name already exist
+        let existingFileHandle = await fs.open(path, "r");
+        existingFileHandle.close();
         return console.log(`this ile ${path} already exists, use another name`);
-        fs.writeFile("text.txt", path);
       } catch (error) {
-        console.log(error);
+        // if it is not creat one with "w" flags
+        const newFileHandle = await fs.open(path, "w");
+        console.log("new file was cretated");
+        newFileHandle.close();
       }
-      existingFileHandle.close();
     };
 
     // oepn mmethod return another method calleed filehandler
@@ -34,7 +36,7 @@ const fs = require("fs/promises");
 
       //create a flie
       if (command.includes(create)) {
-        const filePath = command.substring(create + 1);
+        const filePath = command.substring(create.length + 1);
         createFile(filePath);
       }
     });
