@@ -3,7 +3,10 @@ const fs = require("fs/promises");
 (async () => {
   try {
     // commands
-    const create = "create a file";
+    const CREATE_FILE = "create a file";
+    const DELETE_FILE = "delete a file";
+    const RENAME_FILE = "rename the file";
+    const ADD_TO_FFILE = "add to the file";
 
     const createFile = async (path) => {
       try {
@@ -34,9 +37,9 @@ const fs = require("fs/promises");
       await CFH.read(buff, offfset, length, position);
       const command = buff.toString("utf-8");
 
-      //create a flie
-      if (command.includes(create)) {
-        const filePath = command.substring(create.length + 1);
+      //CREATE_FILE a flie
+      if (command.includes(CREATE_FILE)) {
+        const filePath = command.substring(CREATE_FILE.length + 1);
         createFile(filePath);
       }
     });
