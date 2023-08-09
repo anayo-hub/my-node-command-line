@@ -6,8 +6,9 @@ const fs = require("fs/promises");
     const CREATE_FILE = "create a file";
     const DELETE_FILE = "delete a file";
     const RENAME_FILE = "rename the file";
-    const ADD_TO_FFILE = "add to the file";
+    const ADD_TO_FILE = "add to the file";
 
+    //crete function
     const createFile = async (path) => {
       try {
         // check if file name already exist
@@ -20,6 +21,21 @@ const fs = require("fs/promises");
         console.log("new file was cretated");
         newFileHandle.close();
       }
+    };
+
+    //delete function
+    const deleteFile = (filePath) => {
+      console.log(filePath);
+    };
+
+    // rename function
+    const renameFile = (oldFilePath, newFilePath) => {
+      console.log(oldFilePath, newFilePath);
+    };
+
+    // addContent
+    const addContent = (filePath, content) => {
+      console.log(filePath, content);
     };
 
     // oepn mmethod return another method calleed filehandler
@@ -37,10 +53,37 @@ const fs = require("fs/promises");
       await CFH.read(buff, offfset, length, position);
       const command = buff.toString("utf-8");
 
-      //CREATE_FILE a flie
+      //crete a flie
+      //create a file <path>
       if (command.includes(CREATE_FILE)) {
         const filePath = command.substring(CREATE_FILE.length + 1);
         createFile(filePath);
+      }
+
+      //delete a flie
+      //delete a file <path>
+      if (command.includes(DELETE_FILE)) {
+        const filePath = command.substring(CREATE_FILE.length + 1);
+        deleteFile(filePath);
+      }
+
+      //rename the flie
+      //rename the file <path>
+      if (command.includes(RENAME_FILE)) {
+        const _idx = command.indexOf(" to ");
+        const oldFilePath = command.substring(RENAME_FILE + 1, _idx);
+        const newFilePath = command.substring(_idx + 4);
+        renameFile(oldFilePath, newFilePath);
+      }
+
+      //add to the flie
+      //add to the file <path> this content: <content>
+      if (command.includes(ADD_TO_FILE)) {
+        const _idx = command.indexOf(" this content ");
+        const filePath = command.substring(ADD_TO_FILE.length + 1, _idx);
+        const content = command.substring(_idx, 15);
+
+        addContent(filePath, content);
       }
     });
 
