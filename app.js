@@ -10,7 +10,7 @@ const fs = require("fs/promises");
         // check if file name already exist
         let existingFileHandle = await fs.open(path, "r");
         existingFileHandle.close();
-        return console.log(`this ile ${path} already exists, use another name`);
+        return console.log(`${path} already exists`);
       } catch (error) {
         // if it is not creat one with "w" flags
         const newFileHandle = await fs.open(path, "w");
