@@ -4,39 +4,103 @@ const fs = require("fs/promises");
   try {
     // commands
     const CREATE_FILE = "create a file";
-    const DELETE_FILE = "delete a file";
+    const DELETE_FILE = "delete the file";
     const RENAME_FILE = "rename the file";
     const ADD_TO_FILE = "add to the file";
 
-    //crete function
     const createFile = async (path) => {
       try {
-        // check if file name already exist
-        let existingFileHandle = await fs.open(path, "r");
-        existingFileHandle.close();
-        return console.log(`${path} already exists`);
+        // Check if file name already exists
+        await fs.access(path, fs.constants.F_OK);
+        console.log(`${path} already exists`);
       } catch (error) {
-        // if it is not creat one with "w" flags
-        const newFileHandle = await fs.open(path, "w");
-        console.log("new file was cretated");
-        newFileHandle.close();
+        if (error.code === "ENOENT") {
+          try {
+            // Create a new file
+            const newFileHandle = await fs.open(path, "w");
+            console.log(`New file ${path} was created`);
+            await newFileHandle.close();
+          } catch (writeError) {
+            console.error(`Error creating file: ${writeError.message}`);
+          }
+        } else {
+          console.error(`Error checking file existence: ${error.message}`);
+        }
       }
     };
 
     //delete function
-    const deleteFile = (filePath) => {
-      console.log(filePath);
+    const deleteFile = async (filePath) => {
+      try {
+        await fs.unlink(filePath);
+        console.log("File deleted successfully");
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          console.error(`File not found: ${filePath}`);
+        } else {
+          console.error(`Error deleting file: ${error.message}`);
+        }
+      }
     };
 
     // rename function
-    const renameFile = (oldFilePath, newFilePath) => {
-      console.log(oldFilePath, newFilePath);
+    const renameFile = async (oldFilePath, newFilePath) => {
+      try {
+        await fs.rename(oldFilePath, newFilePath);
+        console.log(`${oldFilePath} renamed to ${newFilePath}`);
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          console.error(
+            `Error renaming file: The file "${oldFilePath}" does not exist.`
+          );
+        } else if (error.code === "EEXIST") {
+          console.error(
+            `Error renaming file: The file "${newFilePath}" already exists.`
+          );
+        } else {
+          console.error(`Error renaming file: ${error.message}`);
+        }
+      }
     };
 
-    // addContent
-    const addContent = (filePath, content) => {
-      console.log(filePath, content);
+    let addedContent;
+
+    const addContent = async (filePath, content) => {
+      if (addedContent === content) return; // Use 'addedContent' here
+      try {
+        const fileHandle = await fs.open(filePath, "a");
+        await fileHandle.write(content);
+        addedContent = content;
+        await fileHandle.close();
+        console.log(`Added content to ${filePath}: ${content}`);
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          console.error(
+            `Error adding content: The file "${filePath}" does not exist.`
+          );
+        } else if (error.code === "EACCES") {
+          console.error(
+            `Error adding content: Permission denied for file "${filePath}".`
+          );
+        } else {
+          console.error(`Error adding content: ${error.message}`);
+        }
+      }
     };
+    // const addContent = async (filePath, content) => {
+    //   try {
+    //     await fs.appendFile(filePath, content);
+    //     console.log(`Added content to ${filePath}: ${content}`);
+    //   } catch (error) {
+    //     if (error.code === "ENOENT") {
+    //       console.error(
+    //         `Error adding content: The file "${filePath}" does not exist.`
+    //       );
+    //     } else {
+    //       console.error(`Error adding content: ${error.message}`);
+    //     }
+    //   }
+    // };
 
     // oepn mmethod return another method calleed filehandler
     const CFH = await fs.open("./command.txt", "r");
@@ -63,7 +127,7 @@ const fs = require("fs/promises");
       //delete a flie
       //delete a file <path>
       if (command.includes(DELETE_FILE)) {
-        const filePath = command.substring(CREATE_FILE.length + 1);
+        const filePath = command.substring(DELETE_FILE.length + 1);
         deleteFile(filePath);
       }
 
@@ -79,9 +143,9 @@ const fs = require("fs/promises");
       //add to the flie
       //add to the file <path> this content: <content>
       if (command.includes(ADD_TO_FILE)) {
-        const _idx = command.indexOf(" this content ");
+        const _idx = command.indexOf(" this content: ");
         const filePath = command.substring(ADD_TO_FILE.length + 1, _idx);
-        const content = command.substring(_idx, 15);
+        const content = command.substring(_idx + 15);
 
         addContent(filePath, content);
       }
